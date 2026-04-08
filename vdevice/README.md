@@ -50,3 +50,21 @@ ANDROID_SDK_ROOT=/path/to/Android/sdk bash vdevice/setup_pixel4_api30_arm64.sh
 ```bash
 ~/Library/Android/sdk/platform-tools/adb devices
 ```
+
+## Если ошибка: `не найдена команда 'sdkmanager'`
+
+Это значит, что в SDK нет пакета **Android SDK Command-line Tools** (на скриншоте у тебя действительно нет папки `cmdline-tools`).  
+
+Установка:
+
+1. Открой Android Studio.
+2. `Settings` (или `Preferences` на macOS) → `Android SDK`.
+3. Вкладка `SDK Tools`.
+4. Поставь галочку: **Android SDK Command-line Tools (latest)**.
+5. Нажми `Apply` / `OK`.
+
+После этого снова запусти:
+
+```bash
+bash vdevice/setup_pixel4_api30_arm64.sh
+```

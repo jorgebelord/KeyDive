@@ -15,12 +15,12 @@ PACKAGE="system-images;android-30;google_apis;arm64-v8a"
 ROOTAVD_DIR="/Users/egor/rootAVD"
 
 ANDROID_SDK_ROOT="${ANDROID_SDK_ROOT:-$HOME/Library/Android/sdk}"
-CMDLINE_TOOLS_BIN="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+CMDLINE_TOOLS_BIN=""
 EMULATOR_BIN="$ANDROID_SDK_ROOT/emulator"
 PLATFORM_TOOLS_BIN="$ANDROID_SDK_ROOT/platform-tools"
 
 export ANDROID_SDK_ROOT
-export PATH="$CMDLINE_TOOLS_BIN:$EMULATOR_BIN:$PLATFORM_TOOLS_BIN:$PATH"
+export PATH="$EMULATOR_BIN:$PLATFORM_TOOLS_BIN:$PATH"
 
 log() {
   echo "[setup-avd] $*"
@@ -33,10 +33,45 @@ require_cmd() {
   fi
 }
 
+detect_cmdline_tools_bin() {
+  local candidate=""
+
+  if [ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" ] && [ -x "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/avdmanager" ]; then
+    candidate="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin"
+  else
+    candidate="$(find "$ANDROID_SDK_ROOT/cmdline-tools" -maxdepth 3 -type f -name sdkmanager 2>/dev/null | head -n 1 || true)"
+    if [ -n "$candidate" ]; then
+      candidate="$(dirname "$candidate")"
+      if [ ! -x "$candidate/avdmanager" ]; then
+        candidate=""
+      fi
+    fi
+  fi
+
+  echo "$candidate"
+}
+
 log "Проверка Android SDK в: $ANDROID_SDK_ROOT"
 if [ ! -d "$ANDROID_SDK_ROOT" ]; then
   echo "Ошибка: каталог SDK не найден: $ANDROID_SDK_ROOT" >&2
   echo "Установи Android Studio + SDK, либо задай ANDROID_SDK_ROOT вручную." >&2
+  exit 1
+fi
+
+CMDLINE_TOOLS_BIN="$(detect_cmdline_tools_bin)"
+if [ -n "$CMDLINE_TOOLS_BIN" ]; then
+  export PATH="$CMDLINE_TOOLS_BIN:$PATH"
+else
+  cat >&2 <<EOF
+Ошибка: не найдены sdkmanager/avdmanager в Android SDK.
+
+Скорее всего не установлен пакет "Android SDK Command-line Tools".
+Установи его в Android Studio:
+  Android Studio -> Settings -> Android SDK -> SDK Tools ->
+  [x] Android SDK Command-line Tools (latest)
+
+После установки запусти скрипт снова.
+EOF
   exit 1
 fi
 
