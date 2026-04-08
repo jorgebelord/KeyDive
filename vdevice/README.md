@@ -68,3 +68,26 @@ ANDROID_SDK_ROOT=/path/to/Android/sdk bash vdevice/setup_pixel4_api30_arm64.sh
 ```bash
 bash vdevice/setup_pixel4_api30_arm64.sh
 ```
+
+## Если ошибка: `Unable to locate a Java Runtime`
+
+`sdkmanager` работает только при наличии Java (JDK).  
+Поставь JDK 17+:
+
+```bash
+brew install --cask temurin
+```
+
+Добавь Java в текущую сессию терминала:
+
+```bash
+export JAVA_HOME=$(/usr/libexec/java_home)
+export PATH="$JAVA_HOME/bin:$PATH"
+java -version
+```
+
+И снова запусти скрипт:
+
+```bash
+bash vdevice/setup_pixel4_api30_arm64.sh
+```

@@ -33,6 +33,27 @@ require_cmd() {
   fi
 }
 
+ensure_java() {
+  if command -v java >/dev/null 2>&1; then
+    return 0
+  fi
+
+  cat >&2 <<'EOF'
+Ошибка: не найден Java Runtime (JDK), а sdkmanager требует Java.
+
+Установи JDK 17 (или новее), например через Homebrew:
+  brew install --cask temurin
+
+После установки добавь JAVA_HOME:
+  export JAVA_HOME=$(/usr/libexec/java_home)
+  export PATH="$JAVA_HOME/bin:$PATH"
+
+Проверь:
+  java -version
+EOF
+  exit 1
+}
+
 detect_cmdline_tools_bin() {
   local candidate=""
 
@@ -77,6 +98,7 @@ fi
 
 require_cmd sdkmanager
 require_cmd avdmanager
+ensure_java
 
 log "Принимаем лицензии SDK (может занять до минуты)"
 yes | sdkmanager --licenses >/dev/null || true
